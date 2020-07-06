@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+    <title>Pi Control Panle</title>
+
+    <!-- optional style -->
+    <style>
+      .my-col{
+        margin-top: 16px;
+        margin-bottom: 0px;
+        font-weight: bold;
+      }
+
+      .status-statment{
+        color: blue;
+      }
+
+      .stats{
+        margin-top: 2px;
+        margin-bottom: 2px;
+      }  
+    
+    </style>
+
+  </head>
+
+
+  <body>
+
+     <!-- Pullin data from the server -->
+     <script>
+       function startLiveUpdate(){
+
+        const textStatus = document.getElementById('status');
+        const textTemp = document.getElementById('temp');
+        const textUsage = document.getElementById('cpu_usage');
+        const textCPU_Fan = document.getElementById('cpu_fan');
+        const textRAM_Fan = document.getElementById('ram_fan');
+        const textProcess = document.getElementById('procs');
+        const textMUsage = document.getElementById('memory_usage');
+        const textError = document.getElementById('error_msg');
+
+
+        setInterval(function(){
+
+          fetch('/data').then(function(response){
+            return response.json()
+          }).then(function(data){
+            //Updating the data in the page
+          
+            //updating the status
+            if (data.state == "Green"){
+              textStatus.textContent = "All Green";
+              textStatus.style.color = "#449d44";
+            } else if (data.state == "Red"){
+              textStatus.textContent = "Attention Needed!";
+              textStatus.style.color = "Red";
+            } else{
+              textStatus.textContent = "Incorrect Data";
+              textStatus.style.color = "#B28700";
+            };
+
+
+            //updating the temp
+            var ttype = typeof data.temperature;
+            if (ttype == "number"){
+              textTemp.textContent = data.temperature + "C";
+              textTemp.style.color = "black";
+            } else{
+              textTemp.textContent = "Incorrect Data";
+              textTemp.style.color = "#B28700";
+            };
+
+            //updating the cpu usage
+            var ttype = typeof data.cpu_usage;
+            if (ttype == "number"){
+              textUsage.textContent = data.cpu_usage + "%";
+              textUsage.style.color = "black";
+            } else{
+              textUsage.textContent = "Incorrect Data";
+              textUsage.style.color = "#B28700";
+            };
+            
+            //memory usage
+            var ttype = typeof data.cpu_usage;
+            if (ttype == "number"){
+              textMUsage.textContent = data.memory_usage + "%";
+              textMUsage.style.color = "black";
+            } else{
+              textMUsage.textContent = "Incorrect Data";
+              textMUsage.style.color = "#B28700";
+            };
+
+            //processess
+            var ttype = typeof data.cpu_usage;
+            if (ttype == "number"){
+              textProcess.textContent = data.processes;
+              textProcess.style.color = "black";
+            } else{
+              textProcess.textContent = "Incorrect Data";
+              textProcess.style.color = "#B28700";
+            };
+            
+
+            //updating cpu fan stats
+            if (data.cpu_fan == "On"){
+              textCPU_Fan.textContent = "CPU Fan is ON";
+              textCPU_Fan.style.backgroundColor = "#449d44";
+            } else if (data.cpu_fan == "Off"){
+              textCPU_Fan.textContent = "CPU Fan OFF";
+              textCPU_Fan.style.backgroundColor = "#b70000";
+            } else{
+              textCPU_Fan.textContent = "Incorrect Data";
+              textCPU_Fan.style.backgroundColor = "#B28700";
+            };
+
+            //updating cpu fan stats
+            if (data.ram_fan == "On"){
+              textRAM_Fan.textContent = "RAM Fan is ON";
+              textRAM_Fan.style.backgroundColor = "#449d44";
+            } else if (data.ram_fan == "Off"){
+              textRAM_Fan.textContent = "RAM Fan OFF";
+              textRAM_Fan.style.backgroundColor = "#b70000";
+            } else{
+              textRAM_Fan.textContent = "Incorrect Data";
+              textRAM_Fan.style.backgroundColor = "#B28700";
+            };
+
+           
+           
+           //reseting error message unless there is an error 
+          textError.textContent = "No errors";
+          }).catch(function(error){
+            console.log(error);
+            textError.textContent = error;
+            textStatus.textContent = "There is an error: Data might be wrong";
+            textStatus.style.color = "#B28700";
+
+          });
+
+        }, 2000)
+
+        }
+
+       document.addEventListener('DOMContentLoaded', function(){
+         startLiveUpdate();
+       });
+       
+    </script>
+
+    <div class="container-fluid">
+
+      <div class="row justify-content-center">
+        <div class="col-5 col-sm-4" style="margin-top: 10px; font-weight: bold;">
+          <p class="status-line">Pi 4 Status Page</p>
+         
+      </div>
+    </div>
+    <hr>
+
+
+      <div class="row justify-content-center">
+        <div class="col-5 align-self-center my-col">
+          <p class="status-line status-statment">Current State:</p>
+        </div>
+        <div class="col-4 align-self-center my-col">
+          <p id="status" class="status-line the-status">Getting data...</p>
+        </div>
+      </div>
+
+      <hr>
+
+
+      <div class="row justify-content-center">
+        <div class="col-4 align-self-center stats">
+          <p class="status-line status-statment">Temp:</p>
+        </div>
+        <div class="col-2 align-self-center stats">
+          <p id="temp" class="status-line the-status">...</p>
+        </div>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-4 align-self-center stats">
+          <p class="status-line status-statment">CPU Usage:</p>
+        </div>
+        <div class="col-2 align-self-center stats">
+          <p id="cpu_usage" class="status-line the-status">...</p>
+        </div>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-4 align-self-center stats">
+          <p class="status-line status-statment">Memory Usage:</p>
+        </div>
+        <div class="col-2 align-self-center stats">
+          <p id="memory_usage" class="status-line the-status">...</p>
+        </div>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-4 align-self-center stats ">
+          <p class="status-line status-statment">Processes:</p>
+        </div>
+        <div class="col-2 align-self-center stats">
+          <p id="procs" class="status-line the-status">...</p>
+        </div>
+      </div>
+      
+
+      <div class="row justify-content-center">
+        <div class="align-self-center stats">
+          <button id="cpu_fan" type="button" class="btn btn-lg" style="background-color:#a7a1a1; width: 10em;">Getting data...</button>
+        </div>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="align-self-center">
+          <button id="ram_fan" type="button" class="btn btn-lg" style="background-color:#a7a1a1; width: 10em;">Getting data...</button>
+        </div>
+      </div>
+
+      <br>
+      
+      <div class="row">
+        <div class="col-6 col-sm-12" style=" margin-top: 2px; margin-bottom: 2px;">
+          CPU Temperature:
+        </div>
+      </div>
+
+      
+      <div id="TempGraph" style="margin: auto; max-width: 600px; max-height: 200px;"></div>
+
+      <div>
+        <p>
+         <strong style="margin: auto;"  id="graph_error"></strong>
+        </p>     
+      </div>
+
+      <div class="row">
+        <div class="col-6 col-sm-12" style=" margin-top: 2px; margin-bottom: 2px;">
+          <br>
+          <p>
+            <strong>Errors: </strong> <strong id="error_msg">No errors</strong>
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+  
+    <!-- Optional JavaScript -->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+
+    <script>
+
+      function updateLiveTempGraph(mainGraph, graphData) {
+        fetch('/data').then(function(response){
+          return response.json()
+        }).then(function(my_data){
+
+          //check if the data is right
+          if(typeof my_data.temperature =="number"){
+
+            graphData = my_data.graph_data;
+
+            //update graph with new data
+            mainGraph.setData(graphData);
+          } else{
+            console.log("Temp not a num")
+          }
+
+        });
+      }
+
+      
+
+      function UpdateTempGraph(){
+
+        const TextGraphError = document.getElementById('graph_error');
+        var mainGraph;
+        count = 1;
+
+        //get the first data and initilise the graph
+        fetch('/data').then(function(response){
+            return response.json()
+          }).then(function(my_data){
+
+
+            //get the temperature
+            if (typeof my_data.temperature == "number"){
+
+                graphData = my_data.graph_data;
+
+                // Initialise a Morris line graph and store it in mainGraph
+                mainGraph = Morris.Line({
+                  element: 'TempGraph',
+                  // Tell Morris where the data is
+                  data: graphData,
+                  // Tell Morris which property of the data is to be mapped to which axis
+                  xkey: 'timestamp',
+                  ykeys: ['temp'],
+          
+                  postUnits: ' °c',
+                  lineColors: ['#199cef'],
+                  goals: [6.0],
+                  goalLineColors: ['#FF0000'],
+                  labels: ['Temperature'],
+                  lineWidth: 3,
+                  pointSize: 2,
+                  resize: true,
+                  hideHover: "auto",
+		  pointSize: 0.2
+                  });
+                  
+            } else {
+              TextGraphError.textContent = "Can't load the graph: Incorrect data";
+              TextGraphError.style.color = "Red";
+            };
+
+            setInterval(function(){ updateLiveTempGraph(mainGraph, graphData);}, 200);
+          
+
+        });
+        
+
+    };
+
+    document.addEventListener('DOMContentLoaded', function(){
+         UpdateTempGraph();
+       });
+      
+    
+      
+      
+    </script>
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+  </body>
+</html>
